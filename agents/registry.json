@@ -1,0 +1,193 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-04-19",
+  "organization": "BelichickGillisMusk",
+  "agents": [
+    {
+      "id": "mila",
+      "name": "MILA",
+      "type": "autonomous",
+      "status": "active",
+      "deployment": "vercel",
+      "sourceRepo": "BelichickGillisMusk/demo-repository",
+      "sourcePaths": [
+        "MILA-VERCEL-SETUP.md",
+        "api/mila-mcp-server.js",
+        "api/mila-task.js",
+        "api/mila-status.js",
+        "mila-command-center.html",
+        ".github/workflows/mila.yml",
+        ".github/workflows/mila-autonomous.yml"
+      ],
+      "capabilities": ["calendar", "gmail", "task-management", "mcp-server", "autonomous-workflows"],
+      "integrations": ["google-calendar", "gmail", "vercel", "github-actions"]
+    },
+    {
+      "id": "samantha",
+      "name": "Samantha",
+      "type": "autonomous",
+      "status": "active",
+      "deployment": "vercel",
+      "capabilities": ["assistant", "scheduling"],
+      "integrations": [],
+      "requiredIntegrations": ["google-calendar", "gmail"],
+      "setupGuide": "./agents/samantha/google-api-setup.md"
+    },
+    {
+      "id": "belichick-strategy",
+      "name": "Belichick Strategy Agent",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/belichick-strategy/SKILL.md",
+      "capabilities": ["strategy", "planning", "decision-making"]
+    },
+    {
+      "id": "jonjones-sales",
+      "name": "Jon Jones Sales Agent",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/jonjones-sales/SKILL.md",
+      "capabilities": ["sales", "business-development"]
+    },
+    {
+      "id": "mila-carb-cs",
+      "name": "MILA Carb CS",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/mila-carb-cs/SKILL.md",
+      "capabilities": ["customer-service", "code-assistance"],
+      "references": ["skills/mila-carb-cs/references/clean-truck-check-complete.md"]
+    },
+    {
+      "id": "mila-legal",
+      "name": "MILA Legal",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/mila-legal/SKILL.md",
+      "capabilities": ["legal-assistance", "document-review"]
+    },
+    {
+      "id": "musk-creative",
+      "name": "Musk Creative Agent",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/musk-creative/SKILL.md",
+      "capabilities": ["creative-content", "innovation"]
+    },
+    {
+      "id": "slack-recon",
+      "name": "Slack Recon Agent",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/slack-recon-agent/SKILL.md",
+      "capabilities": ["slack-monitoring", "channel-mapping", "reconnaissance"],
+      "implementation": ["src/slack-bot/agents.js", "src/slack-bot/dispatch.js"]
+    },
+    {
+      "id": "tps-report",
+      "name": "TPS Report Agent",
+      "type": "skill",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/belichick-margo-jesus",
+      "sourcePath": "skills/tps-report/SKILL.md",
+      "capabilities": ["report-generation", "automation"]
+    },
+    {
+      "id": "kesha",
+      "name": "Kesha",
+      "type": "openclaw",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/demo-repository",
+      "sourcePath": "openclaw/workspace/skills/kesha/SKILL.md",
+      "setupGuide": "OpenClaw/KESHA-SETUP.md"
+    },
+    {
+      "id": "overnight-ops",
+      "name": "Overnight Ops",
+      "type": "openclaw",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/demo-repository",
+      "sourcePath": "openclaw/workspace/skills/overnight-ops/SKILL.md"
+    },
+    {
+      "id": "cloud-agent-starter",
+      "name": "Cloud Agent Starter",
+      "type": "template",
+      "status": "available",
+      "sourceRepo": "BelichickGillisMusk/Claude-Gillis-Musk-Main",
+      "sourcePath": "skills/cloud-agent-starter.md",
+      "capabilities": ["template", "starter"]
+    },
+    {
+      "id": "hr-agent",
+      "name": "HR Agent",
+      "type": "function",
+      "status": "active",
+      "sourceRepo": "BelichickGillisMusk/virtual-office-hub",
+      "sourcePath": "src/lib/hrAgent.ts",
+      "capabilities": ["hr-operations", "agent-management"]
+    },
+    {
+      "id": "operation-agent",
+      "name": "Operation Agent",
+      "type": "api",
+      "status": "active",
+      "sourceRepo": "BelichickGillisMusk/Operation-Get-Shit-Done",
+      "sourcePath": "app/api/agent/route.ts",
+      "capabilities": ["task-execution"]
+    },
+    {
+      "id": "briefs-agents",
+      "name": "Briefs Command Center Agents",
+      "type": "dashboard",
+      "status": "active",
+      "sourceRepo": "BelichickGillisMusk/briefs",
+      "sourcePath": "command-center/",
+      "files": ["dashboard.js", "data.js", "index.html", "styles.css"],
+      "capabilities": ["morning-briefs", "night-briefs", "meeting-coordination"]
+    }
+  ],
+  "commandCenters": [
+    {
+      "id": "briefs-command-center",
+      "name": "Briefs Command Center",
+      "sourceRepo": "BelichickGillisMusk/briefs",
+      "sourcePath": "command-center/",
+      "entryPoint": "index.html"
+    },
+    {
+      "id": "virtual-office-hub",
+      "name": "Virtual Office Hub",
+      "sourceRepo": "BelichickGillisMusk/virtual-office-hub",
+      "components": [
+        "src/components/HRDashboard.tsx",
+        "src/components/OfficeScene.tsx",
+        "src/components/AgentChat.tsx",
+        "src/components/TeamManagement.tsx"
+      ],
+      "dataFiles": [
+        "src/lib/officeData.ts",
+        "src/lib/delegation.ts",
+        "src/lib/hrAgent.ts"
+      ]
+    },
+    {
+      "id": "demo-agents-page",
+      "name": "Demo Repository Agents Page",
+      "sourceRepo": "BelichickGillisMusk/demo-repository",
+      "sourcePath": "agents.html"
+    }
+  ],
+  "openclawWorkspace": {
+    "sourceRepo": "BelichickGillisMusk/demo-repository",
+    "basePath": "openclaw/workspace/",
+    "agentsRegistry": "AGENTS.md",
+    "skillsPath": "skills/"
+  }
+}
