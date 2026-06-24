@@ -31,7 +31,12 @@ GOOGLE_REFRESH_TOKEN=
 GOOGLE_REDIRECT_URI=
 GOOGLE_CALENDAR_ID=primary
 GMAIL_USER=
+AGENT_API_TOKEN=<generate with: openssl rand -hex 32>
 ```
+
+> **Security:** All API endpoints must validate a bearer token from the
+> `AGENT_API_TOKEN` environment variable before processing requests.
+> See the Samantha setup guide for the reference `_auth.js` helper.
 
 ### 3. Required Scopes
 ```

@@ -49,15 +49,39 @@ GOOGLE_REFRESH_TOKEN=your_refresh_token_here
 GOOGLE_REDIRECT_URI=https://your-samantha-app.vercel.app/api/auth/callback
 GOOGLE_CALENDAR_ID=primary
 GMAIL_USER=your_email@gmail.com
+AGENT_API_TOKEN=<generate with: openssl rand -hex 32>
 ```
 
 ## Step 5: Add API Endpoints
 
-Copy these from Mila's implementation in `demo-repository/api/`:
+Copy these from Mila's implementation in `demo-repository/api/`.
+
+> **Security note:** Both endpoints require the `AGENT_API_TOKEN` environment
+> variable and reject requests that do not present a matching `Authorization:
+> Bearer <token>` header. Generate a strong random token (e.g.
+> `openssl rand -hex 32`) and add it to Vercel as `AGENT_API_TOKEN`.
+
+### Auth helper (`api/_auth.js`)
+```javascript
+export function requireAuth(req, res) {
+  const token = process.env.AGENT_API_TOKEN;
+  if (!token) {
+    res.status(500).json({ error: 'AGENT_API_TOKEN not configured' });
+    return false;
+  }
+  const header = req.headers.authorization || '';
+  if (header !== `Bearer ${token}`) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+```
 
 ### Calendar Endpoint (`api/calendar.js`)
 ```javascript
 import { google } from 'googleapis';
+import { requireAuth } from './_auth.js';
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -72,6 +96,8 @@ oauth2Client.setCredentials({
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 export default async function handler(req, res) {
+  if (!requireAuth(req, res)) return;
+
   if (req.method === 'GET') {
     const events = await calendar.events.list({
       calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
@@ -82,20 +108,27 @@ export default async function handler(req, res) {
     });
     return res.json(events.data.items);
   }
-  
+
   if (req.method === 'POST') {
+    const { summary, description, start, end, location } = req.body;
+    if (!summary || !start || !end) {
+      return res.status(400).json({ error: 'summary, start, and end are required' });
+    }
     const event = await calendar.events.insert({
       calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
-      resource: req.body,
+      resource: { summary, description, start, end, location },
     });
     return res.json(event.data);
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
 ```
 
 ### Gmail Endpoint (`api/gmail.js`)
 ```javascript
 import { google } from 'googleapis';
+import { requireAuth } from './_auth.js';
 
 const oauth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -109,7 +142,13 @@ oauth2Client.setCredentials({
 
 const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
+function sanitizeHeader(value) {
+  return String(value).replace(/[\r\n]/g, '');
+}
+
 export default async function handler(req, res) {
+  if (!requireAuth(req, res)) return;
+
   if (req.method === 'GET') {
     const messages = await gmail.users.messages.list({
       userId: 'me',
@@ -117,27 +156,32 @@ export default async function handler(req, res) {
     });
     return res.json(messages.data);
   }
-  
+
   if (req.method === 'POST') {
     const { to, subject, body } = req.body;
+    if (!to || !subject || !body) {
+      return res.status(400).json({ error: 'to, subject, and body are required' });
+    }
     const message = [
-      `To: ${to}`,
-      `Subject: ${subject}`,
+      `To: ${sanitizeHeader(to)}`,
+      `Subject: ${sanitizeHeader(subject)}`,
       '',
       body
     ].join('\n');
-    
+
     const encodedMessage = Buffer.from(message)
       .toString('base64')
       .replace(/\+/g, '-')
       .replace(/\//g, '_');
-    
+
     const sent = await gmail.users.messages.send({
       userId: 'me',
       resource: { raw: encodedMessage },
     });
     return res.json(sent.data);
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
 ```
 
@@ -150,8 +194,14 @@ npm install googleapis
 ## Step 7: Deploy & Test
 
 1. Deploy to Vercel: `vercel --prod`
-2. Test calendar: `curl https://your-app.vercel.app/api/calendar`
-3. Test gmail: `curl https://your-app.vercel.app/api/gmail`
+2. Test calendar:
+   ```bash
+   curl -H "Authorization: Bearer $AGENT_API_TOKEN" https://your-app.vercel.app/api/calendar
+   ```
+3. Test gmail:
+   ```bash
+   curl -H "Authorization: Bearer $AGENT_API_TOKEN" https://your-app.vercel.app/api/gmail
+   ```
 
 ## Reference
 
