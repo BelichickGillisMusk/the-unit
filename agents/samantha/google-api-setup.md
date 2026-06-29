@@ -49,7 +49,12 @@ GOOGLE_REFRESH_TOKEN=your_refresh_token_here
 GOOGLE_REDIRECT_URI=https://your-samantha-app.vercel.app/api/auth/callback
 GOOGLE_CALENDAR_ID=primary
 GMAIL_USER=your_email@gmail.com
+API_SECRET=your_strong_random_secret_here
 ```
+
+Generate `API_SECRET` with: `openssl rand -base64 32`
+
+All API requests must include `Authorization: Bearer <API_SECRET>` header.
 
 ## Step 5: Add API Endpoints
 
@@ -71,7 +76,18 @@ oauth2Client.setCredentials({
 
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
+function authenticate(req, res) {
+  const token = req.headers.authorization;
+  if (!token || token !== `Bearer ${process.env.API_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+
 export default async function handler(req, res) {
+  if (!authenticate(req, res)) return;
+
   if (req.method === 'GET') {
     const events = await calendar.events.list({
       calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
@@ -90,6 +106,8 @@ export default async function handler(req, res) {
     });
     return res.json(event.data);
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
 ```
 
@@ -109,7 +127,22 @@ oauth2Client.setCredentials({
 
 const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
+function authenticate(req, res) {
+  const token = req.headers.authorization;
+  if (!token || token !== `Bearer ${process.env.API_SECRET}`) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+
+function sanitizeHeader(value) {
+  return String(value).replace(/[\r\n]/g, '');
+}
+
 export default async function handler(req, res) {
+  if (!authenticate(req, res)) return;
+
   if (req.method === 'GET') {
     const messages = await gmail.users.messages.list({
       userId: 'me',
@@ -120,9 +153,13 @@ export default async function handler(req, res) {
   
   if (req.method === 'POST') {
     const { to, subject, body } = req.body;
+    if (!to || !subject || !body) {
+      return res.status(400).json({ error: 'Missing required fields: to, subject, body' });
+    }
+
     const message = [
-      `To: ${to}`,
-      `Subject: ${subject}`,
+      `To: ${sanitizeHeader(to)}`,
+      `Subject: ${sanitizeHeader(subject)}`,
       '',
       body
     ].join('\n');
@@ -138,6 +175,8 @@ export default async function handler(req, res) {
     });
     return res.json(sent.data);
   }
+
+  return res.status(405).json({ error: 'Method not allowed' });
 }
 ```
 
@@ -150,8 +189,9 @@ npm install googleapis
 ## Step 7: Deploy & Test
 
 1. Deploy to Vercel: `vercel --prod`
-2. Test calendar: `curl https://your-app.vercel.app/api/calendar`
-3. Test gmail: `curl https://your-app.vercel.app/api/gmail`
+2. Test calendar: `curl -H "Authorization: Bearer $API_SECRET" https://your-app.vercel.app/api/calendar`
+3. Test gmail: `curl -H "Authorization: Bearer $API_SECRET" https://your-app.vercel.app/api/gmail`
+4. Verify unauthorized access is blocked: `curl https://your-app.vercel.app/api/calendar` (should return 401)
 
 ## Reference
 
