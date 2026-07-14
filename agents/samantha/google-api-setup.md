@@ -62,6 +62,7 @@ Copy these from Mila's implementation in `demo-repository/api/`:
 
 ### Calendar Endpoint (`api/calendar.js`)
 ```javascript
+import crypto from 'crypto';
 import { google } from 'googleapis';
 
 const oauth2Client = new google.auth.OAuth2(
@@ -78,7 +79,12 @@ const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 function authenticate(req, res) {
   const token = req.headers.authorization;
-  if (!token || token !== `Bearer ${process.env.API_SECRET}`) {
+  const expected = `Bearer ${process.env.API_SECRET}`;
+  if (
+    !token ||
+    Buffer.byteLength(token) !== Buffer.byteLength(expected) ||
+    !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))
+  ) {
     res.status(401).json({ error: 'Unauthorized' });
     return false;
   }
@@ -113,6 +119,7 @@ export default async function handler(req, res) {
 
 ### Gmail Endpoint (`api/gmail.js`)
 ```javascript
+import crypto from 'crypto';
 import { google } from 'googleapis';
 
 const oauth2Client = new google.auth.OAuth2(
@@ -129,7 +136,12 @@ const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
 
 function authenticate(req, res) {
   const token = req.headers.authorization;
-  if (!token || token !== `Bearer ${process.env.API_SECRET}`) {
+  const expected = `Bearer ${process.env.API_SECRET}`;
+  if (
+    !token ||
+    Buffer.byteLength(token) !== Buffer.byteLength(expected) ||
+    !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))
+  ) {
     res.status(401).json({ error: 'Unauthorized' });
     return false;
   }
