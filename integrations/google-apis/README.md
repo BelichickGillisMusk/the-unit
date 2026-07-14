@@ -31,7 +31,12 @@ GOOGLE_REFRESH_TOKEN=
 GOOGLE_REDIRECT_URI=
 GOOGLE_CALENDAR_ID=primary
 GMAIL_USER=
+API_SECRET=your_strong_random_secret_here
 ```
+
+Generate `API_SECRET` with: `openssl rand -base64 32`
+
+All API requests must include `Authorization: Bearer <API_SECRET>` header.
 
 ### 3. Required Scopes
 ```
@@ -49,6 +54,40 @@ npm install googleapis
 ## Agent-Specific Guides
 
 - [Samantha Setup](../../agents/samantha/google-api-setup.md)
+
+## Authentication
+
+Every endpoint **must** authenticate requests before performing any Google API operation.
+
+```javascript
+import crypto from 'crypto';
+
+function authenticate(req, res) {
+  const token = req.headers.authorization;
+  const expected = `Bearer ${process.env.API_SECRET}`;
+  if (
+    !token ||
+    Buffer.byteLength(token) !== Buffer.byteLength(expected) ||
+    !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(expected))
+  ) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return false;
+  }
+  return true;
+}
+```
+
+Call `authenticate(req, res)` at the top of every handler and return early on failure. See the [Samantha setup guide](../../agents/samantha/google-api-setup.md) for complete endpoint implementations.
+
+## Input Sanitization
+
+Strip newline characters from any user-supplied value used in email headers to prevent header injection:
+
+```javascript
+function sanitizeHeader(value) {
+  return String(value).replace(/[\r\n]/g, '');
+}
+```
 
 ## API Patterns
 
@@ -86,10 +125,10 @@ const messages = await gmail.users.messages.list({
 ### Gmail Send
 ```javascript
 const message = Buffer.from([
-  `To: recipient@example.com`,
-  `Subject: Hello`,
+  `To: ${sanitizeHeader(to)}`,
+  `Subject: ${sanitizeHeader(subject)}`,
   '',
-  'Message body'
+  body
 ].join('\n')).toString('base64');
 
 await gmail.users.messages.send({
