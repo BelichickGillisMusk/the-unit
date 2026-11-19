@@ -99,23 +99,6 @@
       "capabilities": ["report-generation", "automation"]
     },
     {
-      "id": "kesha",
-      "name": "Kesha",
-      "type": "openclaw",
-      "status": "available",
-      "sourceRepo": "BelichickGillisMusk/demo-repository",
-      "sourcePath": "openclaw/workspace/skills/kesha/SKILL.md",
-      "setupGuide": "OpenClaw/KESHA-SETUP.md"
-    },
-    {
-      "id": "overnight-ops",
-      "name": "Overnight Ops",
-      "type": "openclaw",
-      "status": "available",
-      "sourceRepo": "BelichickGillisMusk/demo-repository",
-      "sourcePath": "openclaw/workspace/skills/overnight-ops/SKILL.md"
-    },
-    {
       "id": "cloud-agent-starter",
       "name": "Cloud Agent Starter",
       "type": "template",
@@ -183,11 +166,5 @@
       "sourceRepo": "BelichickGillisMusk/demo-repository",
       "sourcePath": "agents.html"
     }
-  ],
-  "openclawWorkspace": {
-    "sourceRepo": "BelichickGillisMusk/demo-repository",
-    "basePath": "openclaw/workspace/",
-    "agentsRegistry": "AGENTS.md",
-    "skillsPath": "skills/"
-  }
+  ]
 }
